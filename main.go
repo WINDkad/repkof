@@ -12,6 +12,7 @@ type requestBody struct {
 }
 
 type responseBody struct {
+	ID     uint   `json:"ID"`
 	Task   string `json:"task"`
 	IsDone bool   `json:"is_done"`
 }
@@ -24,8 +25,17 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var response []responseBody
+
+	for _, msg := range messages {
+		response = append(response, responseBody{
+			ID:     msg.ID,
+			Task:   msg.Task,
+			IsDone: msg.IsDone})
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(messages)
+	json.NewEncoder(w).Encode(response)
 }
 
 func CreateMessage(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +55,9 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(responseBody{
-		Task:   message.Task,
-		IsDone: message.IsDone,
+		ID:     task.ID,
+		Task:   task.Task,
+		IsDone: task.IsDone,
 	})
 }
 
