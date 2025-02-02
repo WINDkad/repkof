@@ -1,6 +1,8 @@
 package main
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Message struct {
 	gorm.Model

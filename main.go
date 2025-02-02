@@ -61,6 +61,59 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func UpdateMessage(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	var message Message
+	if err := DB.First(&message, id).Error; err != nil {
+		http.Error(w, "Message not found", http.StatusNotFound)
+		return
+	}
+
+	var requestBody requestBody
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	if requestBody.Task != "" {
+		message.Task = requestBody.Task
+	}
+	message.IsDone = requestBody.IsDone
+
+	if err := DB.Save(&message).Error; err != nil {
+		http.Error(w, "Failed to update message", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(responseBody{
+		ID:     message.ID,
+		Task:   message.Task,
+		IsDone: message.IsDone,
+	})
+}
+
+func DeleteMessage(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	var message Message
+	if err := DB.First(&message, id).Error; err != nil {
+		http.Error(w, "Message not found", http.StatusNotFound)
+		return
+	}
+
+	if err := DB.Delete(&message).Error; err != nil {
+		http.Error(w, "Failed to delete message", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func main() {
 	InitDB()
 
@@ -69,5 +122,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/messages", CreateMessage).Methods("POST")
 	router.HandleFunc("/api/messages", GetMessages).Methods("GET")
+	router.HandleFunc("/api/messages/{id}", UpdateMessage).Methods("PATCH")
+	router.HandleFunc("/api/messages/{id}", DeleteMessage).Methods("DELETE")
 	http.ListenAndServe(":8080", router)
 }
