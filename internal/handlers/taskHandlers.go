@@ -38,7 +38,7 @@ func (h *Handler) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *Handler) PostTaskHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task taskService.Task
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
