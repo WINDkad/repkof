@@ -1,6 +1,8 @@
 package taskService
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type TaskRepository interface {
 	CreateTask(task Task) (Task, error)

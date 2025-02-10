@@ -1,5 +1,9 @@
 package taskService
 
+import (
+	"errors"
+)
+
 type TaskResponse struct {
 	ID     uint   `json:"id"`
 	Task   string `json:"task"`
@@ -10,6 +14,8 @@ type TaskService struct {
 	repo TaskRepository
 }
 
+var ErrTaskNotFound = errors.New("task not found")
+
 func NewService(repo TaskRepository) *TaskService {
 	return &TaskService{repo: repo}
 }
@@ -18,7 +24,7 @@ func (s *TaskService) CreateTask(task Task) (Task, error) {
 	return s.repo.CreateTask(task)
 }
 
-func (s *TaskService) GetTaskById() ([]Task, error) {
+func (s *TaskService) GetAllTasks() ([]Task, error) {
 	return s.repo.GetAllTasks()
 }
 
