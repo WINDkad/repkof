@@ -4,6 +4,7 @@ import (
 	"WIND/internal/taskService"
 	"WIND/internal/web/tasks"
 	"context"
+	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
@@ -60,9 +61,12 @@ func (h *Handler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRe
 
 	err := h.Service.DeleteTaskById(taskId)
 	if err != nil {
+		if err == taskService.ErrTaskNotFound {
+			return nil, echo.NewHTTPError(404, "Task not found")
+		}
 		return nil, err
 	}
-	return nil, nil
+	return nil, echo.NewHTTPError(204, "Task deleted")
 }
 
 func (h *Handler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {

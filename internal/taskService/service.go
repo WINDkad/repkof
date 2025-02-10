@@ -33,5 +33,25 @@ func (s *TaskService) UpdateTaskById(id uint, task Task) (Task, error) {
 }
 
 func (s *TaskService) DeleteTaskById(id uint) error {
-	return s.repo.DeleteTaskByID(id)
+	tasks, err := s.GetAllTasks()
+	if err != nil {
+		return err
+	}
+
+	var taskToDelete *Task
+	for _, task := range tasks {
+		if task.ID == id {
+			taskToDelete = &task
+			break
+		}
+	}
+
+	if taskToDelete == nil {
+		return ErrTaskNotFound
+	}
+
+	if err := s.repo.DeleteTaskByID(id); err != nil {
+		return err
+	}
+	return nil
 }
