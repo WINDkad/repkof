@@ -7,18 +7,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
+type taskHandler struct {
 	Service *taskService.TaskService
 }
 
-func NewHandler(service *taskService.TaskService) *Handler {
-	return &Handler{
+func NewTaskHandler(service *taskService.TaskService) *taskHandler {
+	return &taskHandler{
 		Service: service,
 	}
 }
 
-func (h *Handler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
-	allTasks, err := h.Service.GetAllTasks()
+func (t *taskHandler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
+	allTasks, err := t.Service.GetAllTasks()
 	if err != nil {
 		return nil, err
 	}
@@ -36,14 +36,14 @@ func (h *Handler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (ta
 	return response, nil
 }
 
-func (h *Handler) PostTasks(_ context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
+func (t *taskHandler) PostTasks(_ context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
 	taskRequest := request.Body
 
 	taskToCreate := taskService.Task{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
 	}
-	createdTask, err := h.Service.CreateTask(taskToCreate)
+	createdTask, err := t.Service.CreateTask(taskToCreate)
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +56,10 @@ func (h *Handler) PostTasks(_ context.Context, request tasks.PostTasksRequestObj
 	return response, nil
 }
 
-func (h *Handler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
+func (t *taskHandler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
 	taskId := request.Id
 
-	err := h.Service.DeleteTaskById(taskId)
+	err := t.Service.DeleteTaskById(taskId)
 	if err != nil {
 		if err == taskService.ErrTaskNotFound {
 			return nil, echo.NewHTTPError(404, "Task not found")
@@ -69,7 +69,7 @@ func (h *Handler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRe
 	return nil, echo.NewHTTPError(204, "Task deleted")
 }
 
-func (h *Handler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
+func (t *taskHandler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
 	taskRequest := request.Body
 
 	taskToUpdate := taskService.Task{
@@ -77,7 +77,7 @@ func (h *Handler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequ
 		IsDone: *taskRequest.IsDone,
 	}
 
-	updatedTask, err := h.Service.UpdateTaskById(request.Id, taskToUpdate)
+	updatedTask, err := t.Service.UpdateTaskById(request.Id, taskToUpdate)
 	if err != nil {
 		return nil, err
 	}
